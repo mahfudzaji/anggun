@@ -147,6 +147,7 @@ $router->get('form/do/detail', 'FormController@doFormDetail');
 $router->post('form/do/approve', 'FormController@doFormApproval');
 $router->post('form/do/update', 'FormController@doFormUpdate');
 $router->post('form/do/remove', 'FormController@doFormRemove');
+$router->get('form/do/get-number', 'FormController@doFormNumber');
 
 //PRODUCTS AND STOCKS
 $router->get('product', 'PAController@index');
@@ -174,11 +175,12 @@ $router->get('stock/get-stock-list', 'StockController@getStockList');
 $router->get('stock/check-stock-available', 'StockController@checkStock');
 $router->get('stock/check-stock-category', 'StockController@checkStockByCategory');
 $router->get('stock/detail', 'StockController@stockDetail');
-
+$router->get('stock/io', 'StockController@stockIO');
 
 //tested
 $router->post('stock/in', 'StockController@stockIn');
 $router->post('stock/update', 'StockController@stockUpdate');
+$router->post('stock/remove', 'StockController@stockRemove');
 
 //SETTINGS
 $router->get('settings', 'SettingController@index');

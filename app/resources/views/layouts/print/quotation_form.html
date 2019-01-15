@@ -59,6 +59,7 @@ tr{
                         <th style="border:1px solid; padding: 0 20px 0 10px;" >Part Number</th>
                         <th style="border:1px solid; padding: 0 20px 0 10px;" >Product</th>
                         <th style="border:1px solid; padding: 0 20px 0 10px;" >Quantity</th>
+                        <th style="border:1px solid; padding: 0 20px 0 10px;" >Unit</th>
                         <th style="border:1px solid; padding: 0 20px 0 10px;" >Price unit</th>
                         <th style="border:1px solid; padding: 0 20px 0 10px;" >Discount(%)</th>
                         <th style="border:1px solid; padding: 0 20px 0 10px;" >Price total</th>
@@ -68,8 +69,15 @@ tr{
                 <?php foreach($quoDetailData as $data1): $item=(100-$data1->item_discount)*$data1->total*0.01; $priceTotal+=$item; if($data1->status!=1){$approved=false;}?>
                     <tr class="quo-item" data-item=<?= $data1->id; ?>>
                         <td style="border:1px solid; padding: 0 20px 0 10px;"  data-item="part_number" data-item-val=<?= $data1->part_number; ?>><?= $data1->part_number; ?></td>
-                        <td style="border:1px solid; padding: 0 20px 0 10px;"  data-item="product" data-item-val=<?= $data1->pid; ?>><?= $data1->product; ?></td>
+                        <td style="border:1px solid; padding: 0 20px 0 10px;"  data-item="product" data-item-val=<?= $data1->pid; ?>>
+                            <?php if($data1->other_name!=null || $data1->other_name!="" || !empty($data1->other_name)): ?>
+                                <?= makeFirstLetterUpper($data1->other_name); ?>
+                            <?php else: ?>
+                                <?= makeFirstLetterUpper($data1->product); ?>
+                            <?php endif; ?>
+                        </td>
                         <td style="border:1px solid; padding: 0 20px 0 10px;"  data-item="quantity"><?= $data1->quantity; ?></td>
+                        <td style="border:1px solid; padding: 0 20px 0 10px;"  data-item="quantity"><?= $data1->unit; ?></td>
                         <td style="border:1px solid; padding: 0 20px 0 10px;"  data-item="price_unit"><?= formatRupiah($data1->price_unit); ?></td>
                         <td style="border:1px solid; padding: 0 20px 0 10px;"  data-item="item_discount"><?= $data1->item_discount; ?></td>
                         <td style="border:1px solid; padding: 0 20px 0 10px;"  data-item="total" class="text-right"><?= formatRupiah($item); ?></td>

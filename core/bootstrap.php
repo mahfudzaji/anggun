@@ -247,8 +247,13 @@ function checkRequirement($requirements, $placeholder, $data){
 }
 
 function makeFirstLetterUpper($words){
-    $firstLetter= strtoupper($words[0]);
-    return $firstLetter.substr($words, 1);
+    if(strlen($words)>0){
+        $firstLetter= strtoupper($words[0]);
+        return $firstLetter.substr($words, 1);
+    }else{
+        return "-";
+    }
+    
 }
 
 function toDownload($formData, $dataColumn){

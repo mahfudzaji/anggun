@@ -123,7 +123,7 @@ require base.'base/header.view.php';
     </div>
 
     <div class="app-form modal" id="modal-create-quo-form">         
-        <div class="modal-content">
+        <div class="modal-content" style="width:60%">
             <div class="modal-header">
                 <h3>Tambahkan <?= $titlePage; ?></h3>
             </div>
@@ -220,18 +220,28 @@ require base.'base/header.view.php';
                                 <select name="product[]" class="form-control" required>
                                     <option value=''>PRODUK</option>
                                     <?php foreach($products as $product): ?>
-                                        <option title="<?= $product->name; ?>" value=<?= $product->id ?>><?= (strlen($product->name)>50)?substr(ucfirst($product->name),0, 50)."...":ucfirst($product->name); ?></option>
+                                        <?php if($product->name=='Other'): ?>
+                                            <option title="<?= $product->name; ?>" value=<?= $product->id ?> class="other-name"><?= (strlen($product->name)>50)?substr(ucfirst($product->name),0, 50)."...":ucfirst($product->name); ?></option>
+                                        <?php else: ?>
+                                            <option title="<?= $product->name; ?>" value=<?= $product->id ?>><?= (strlen($product->name)>50)?substr(ucfirst($product->name),0, 50)."...":ucfirst($product->name); ?></option>
+                                        <?php endif; ?>
                                     <?php endforeach; ?>
                                 </select>
                             </div>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <div class="form-group">
                                 <label>Jumlah</label>
                                 <input type="number" min=0 name="quantity[]" class="form-control" required>
                             </div>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label>Satuan</label>
+                                <input type="text" name="unit[]" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
                             <div class="form-group">
                                 <label>Harga satuan</label>
                                 <input type="number" min=0 name="price_unit[]" class="form-control" required>
@@ -239,11 +249,16 @@ require base.'base/header.view.php';
                         </div>
                         <div class="col-md-2">
                             <div class="form-group">
-                                <label>Disc (%)</label>
-                                <input type="number" min=0 name="item_discount[]" class="form-control">
+                                <label>Diskon (%)</label>
+                                <input type="number" min=0 name="item_discount[]" class="form-control" required>
                             </div>
                         </div>
-                        
+                        <div class="app-form modal ta" style="display:none;">
+                            <div class="modal-content">
+                                <textarea name="other_name[]" ></textarea>
+                                <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span></button>
+                            </div>
+                        </div>
                     </div>
 
                     <!--<span><button class="btn btn-danger btn-float"><span class="glyphicon glyphicon-trash"></span></button></span>-->

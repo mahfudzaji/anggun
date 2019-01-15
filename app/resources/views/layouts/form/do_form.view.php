@@ -308,7 +308,7 @@ require base.'base/header.view.php';
                     var quotationData="Belum terdapat data";
                     var responds=JSON.parse(data);
 
-                    //console.log(responds);
+                    console.log(responds);
 
                     var poData = responds.poData[0];
                     var poNum = poData.po_number;
@@ -323,7 +323,7 @@ require base.'base/header.view.php';
                     var poProduct = "<h3>Supplier: "+supplier+"</h3><h3>Buyer: "+buyer+"</h3><h4>"+addressB+"</h4>";
                     poProduct+="<h4><span style='background-color:#95DEE3;'><a href='/form/po/detail?po="+poData.po+"' target='blank'>"+poNum+"</a></span></h4><h4>Quo date:"+poDate+"</h4>";
 
-                    poProduct += "<table class='table table-striped'><thead><tr><th>Part Number</th><th>Product</th><th>Qty</th></tr></thead><tbody>";
+                    poProduct += "<table class='table table-striped'><thead><tr><th>Part Number</th><th>Product</th><th>Qty</th><th>Unit</th></tr></thead><tbody>";
                     
                     var poDetail = responds.poDetailData;
 
@@ -334,10 +334,19 @@ require base.'base/header.view.php';
                     var firstStockItem = firstStockDetail.find(".stock-item:first");
 
                     for(var i=0; i<poDetail.length; i++){
+                        
+                        var pr='';
+
+                        if(poDetail[i].other_name!="" && poDetail[i].other_name!=null){
+                            pr = poDetail[i].other_name;
+                        }else{
+                            pr = poDetail[i].product;
+                        }
 
                         poProduct += "<tr data-item="+poDetail[i].pid+"><td>"+poDetail[i].part_number+"</td>";
-                        poProduct += "<td>"+poDetail[i].product+"</td>";
-                        poProduct += "<td>"+poDetail[i].quantity+"</td></tr>";
+                        poProduct += "<td>"+pr+"</td>";
+                        poProduct += "<td>"+poDetail[i].quantity+"</td>";
+                        poProduct += "<td>"+poDetail[i].unit+"</td></tr>";
                         //poProduct += "<td><button type='button' class='btn btn-link add-stock-detail btn-modal' id='stock-product-"+poDetail[i].pid+"'>Detail</button></td></tr>";
 
                         var clone = firstStockDetail.clone();

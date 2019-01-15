@@ -20,7 +20,7 @@ require 'base/header.view.php';
         <?php include "app/resources/views/errors/errors.view.php" ?>
         
         <div class='welcome text-center'>
-            <h2>Hello, Selamat datang di <span class="label label-success">Simplify</span>, <?= ucfirst($_SESSION['sim-name']); ?></h2>
+            <h2>Hello, Selamat datang di <span class="label label-success">Anggun</span>, <?= ucfirst($_SESSION['sim-name']); ?></h2>
             <h4 style="margin-top:20px;">Aplikasi yang didesain untuk memudahkan operasional perkantoran</h4>
         </div>
 

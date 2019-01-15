@@ -16,7 +16,7 @@ require base.'base/header.view.php';
         <header id="main-header">
             <h1><?= $titlePage; ?></h1>
             <p>Halaman ini menangani data terkait <?= $titlePage; ?></p>
-            <!-- <button class="btn btn-sm btn-header btn-modal" id="create-stock"><span class="glyphicon glyphicon-pencil"></span> Tambahkan stok</button> -->
+            <!-- <button class="btn btn-sm btn-header btn-modal" id="create-stock"><span class="glyphicon glyphicon-pencil"></span> Tambahkan</button> -->
         </header>
 
         <div class="sub-header"> 
@@ -74,8 +74,8 @@ require base.'base/header.view.php';
                                     <div class="col-md-8">
                                         <h2><?= $data->category; ?></h2>
                                         <p><?= $data->description; ?></p>
-                                        <p>IN: <?= $data->stock_in-$data->stock_out; ?></p>
-                                        <p>OUT: <?= $data->stock_out; ?></p>
+                                        <p>Available: <?= $data->stock_in-$data->stock_out; ?></p>
+                                        <p>Out: <?= $data->stock_out; ?></p>
                                     </div>
                                 </div>
                                 <div class='table-responsive detail' style="background-color:#fff;">
@@ -115,6 +115,7 @@ require base.'base/header.view.php';
                                 <th>Nomor</th>
                                 <th>Quantity</th>
                                 <th>Status</th>
+                                <!-- <th>Action</th> -->
                             <tr>
                         </thead>
                         <tbody>
@@ -165,7 +166,6 @@ require base.'base/header.view.php';
                     stockList += "<td data-item='stock-out' data-item-val="+stockOut+">"+stockOut+"</td>";
                     stockList += "<td data-item='available' data-item-val="+available+">"+available+"</td>";
                     stockList += "<td><button type='button' class='btn btn-link btn-action btn-modal' data-id='stock-detail'>More</button></td>";
-                    //stockList += "<td><button type='button' class='btn btn-sm btn-primary btn-modal' data-id='update-stock'>More</button></td>";
                     stockList += "</tr>";
                 }
 
@@ -200,7 +200,7 @@ require base.'base/header.view.php';
                     stockList += "<td><a href='"+responds[i].link+"' target='_blank'>"+responds[i].form_number+"</a></td>";
                     stockList += "<td>"+responds[i].quantity+"</td>";
                     stockList += "<td>"+responds[i].status+"</td>";
-
+                    //stockList += "<td class='text-center'><div class='btn-group'><button type='button' class='btn btn-default dropdown-toggle' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>Action <span class='caret'></span></button><ul class='dropdown-menu'><li><a href='#' class='btn-modal btn-action' data-id='update-do-form'><span class='glyphicon glyphicon-pencil'></span> Update</a></li><li><a href='#' class='btn-modal btn-action' data-id='remove-do-form'><span class='glyphicon glyphicon-remove'></span> Remove</a></li></ul></div></td>";
                     stockList += "</tr>";
                 }
 

@@ -22,13 +22,20 @@ require base.'base/header.view.php';
         <div class="sub-header"> 
             <form action="/stock/history" method="GET" style="display:inherit">    
                 <input type="hidden" name="search" value="true">
-                <div class="search" id="product-based">
+                <div class="search" id="cat-based">
                     <div class="form-group">
                         <select name="category" class="form-control">
                             <option value=''>Category</option>
                             <?php foreach($category as $cat): ?>cat
                                 <option title="<?= $cat->name; ?>" value=<?= $cat->id ?>><?= makeItShort($cat->name, 50); ?></option>
                             <?php endforeach; ?>
+                        </select>
+                    </div>
+                </div>
+                <div class="search" id="product-based">
+                    <div class="form-group">
+                        <select name="category" class="form-control">
+                            <option value=''>Category</option>
                         </select>
                     </div>
                 </div>

@@ -120,7 +120,8 @@ table.x{
                         <th style="border:1px solid; padding: 0 20px 0 10px;" >Part number</th>
                         <th style="border:1px solid; padding: 0 20px 0 10px;" >Description</th>
                         <th style="border:1px solid; padding: 0 20px 0 10px;" >QTY</th>
-                        <th style="border:1px solid; padding: 0 20px 0 10px;" >Price unit</th>
+                        <th style="border:1px solid; padding: 0 20px 0 10px;" >Unit</th>
+                        <th style="border:1px solid; padding: 0 20px 0 10px;" >Price</th>
                         <th style="border:1px solid; padding: 0 20px 0 10px;" >Discount</th>
                         <th style="border:1px solid; padding: 0 20px 0 10px;" >Total price</th>
                     </tr>
@@ -134,16 +135,23 @@ table.x{
                         ?>
                         <tr>
                             <td style="border:1px solid; padding: 0 20px 0 10px;"><?= $data2->part_number; ?></td>
-                            <td style="border:1px solid; padding: 0 20px 0 10px;"><?= $data2->product; ?></td>
+                            <td style="border:1px solid; padding: 0 20px 0 10px;">
+                                <?php if($data2->other_name!=null || $data2->other_name!="" || !empty($data2->other_name)): ?>
+                                        <?= makeFirstLetterUpper($data2->other_name); ?>
+                                <?php else: ?>
+                                    <?= makeFirstLetterUpper($data2->product); ?>
+                                <?php endif; ?>
+                            </td>
                             <td style="border:1px solid; padding: 0 20px 0 10px;"><?= $data2->quantity; ?></td>
+                            <td style="border:1px solid; padding: 0 20px 0 10px;"><?= $data2->unit; ?></td>
                             <td style="border:1px solid; padding: 0 20px 0 10px;" class="text-right"><?= formatRupiah($data2->price_unit); ?></td>
                             <td style="border:1px solid; padding: 0 20px 0 10px;"><?= $data2->item_discount; ?></td>
                             <td style="border:1px solid; padding: 0 20px 0 10px;" class="text-right"><?= formatRupiah($item); ?></td>
                         </tr>
                     <?php endforeach; ?>
-                        <tr><td style="border:none !important; padding: 0 20px 0 10px;" colspan=4></td><td style="border:1px solid; padding: 0 20px 0 10px;">Total</td><td style="border:1px solid; padding: 0 20px 0 10px;" class="text-right" ><?= formatRupiah($priceTotal); ?></td></tr>
-                        <tr><td style="border:none !important; padding: 0 20px 0 10px;" colspan=4></td><td style="border:1px solid; padding: 0 20px 0 10px;">PPN <?= $data->ppn; ?>%</td><td style="border:1px solid; padding: 0 20px 0 10px;"  class="text-right"><?php $ppn=$priceTotal*($data->ppn/100); echo formatRupiah($ppn); ?></td></tr>
-                        <tr><td style="border:none !important; padding: 0 20px 0 10px;" colspan=4></td><td style="border:1px solid; padding: 0 20px 0 10px;">Grand Total</td><td style="border:1px solid; padding: 0 20px 0 10px;"  class="text-right"><strong><?= formatRupiah($priceTotal+$ppn); ?></strong></td></tr>
+                        <tr><td style="border:none !important; padding: 0 20px 0 10px;" colspan=5></td><td style="border:1px solid; padding: 0 20px 0 10px;">Total</td><td style="border:1px solid; padding: 0 20px 0 10px;" class="text-right" ><?= formatRupiah($priceTotal); ?></td></tr>
+                        <tr><td style="border:none !important; padding: 0 20px 0 10px;" colspan=5></td><td style="border:1px solid; padding: 0 20px 0 10px;">PPN <?= $data->ppn; ?>%</td><td style="border:1px solid; padding: 0 20px 0 10px;"  class="text-right"><?php $ppn=$priceTotal*($data->ppn/100); echo formatRupiah($ppn); ?></td></tr>
+                        <tr><td style="border:none !important; padding: 0 20px 0 10px;" colspan=5></td><td style="border:1px solid; padding: 0 20px 0 10px;">Grand Total</td><td style="border:1px solid; padding: 0 20px 0 10px;"  class="text-right"><strong><?= formatRupiah($priceTotal+$ppn); ?></strong></td></tr>
                 </tbody>            
             </table>
             

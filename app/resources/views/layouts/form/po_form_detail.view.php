@@ -386,10 +386,11 @@ $priceTotal=0;
                                 <th>Part Number</th>
                                 <th>Product</th>
                                 <th>Quantity</th>
+                                <th>Unit</th>
                                 <th>Price unit</th>
                                 <th>Discount(%)</th>
                                 <th>Price total</th>
-                                <th>Status</th>
+                                <!-- <th>Status</th> -->
                                 <th class="text-center">Action</th>
                             </tr>
                         </thead>
@@ -397,16 +398,23 @@ $priceTotal=0;
                         <?php foreach($poDetailData as $data1): $item=(100-$data1->item_discount)*$data1->total*0.01; $priceTotal+=$item; ?>
                             <tr data-item=<?= $data1->id; ?>>
                                 <td data-item="part_number" data-item-val=<?= $data1->part_number; ?>><?= $data1->part_number; ?></td>
-                                <td data-item="product" data-item-val=<?= $data1->pid; ?>><?= $data1->product; ?></td>
+                                <td data-item="product" data-item-val=<?= $data1->pid; ?>>
+                                    <?php if($data1->other_name!=null || $data1->other_name!="" || !empty($data1->other_name)): ?>
+                                        <?= makeFirstLetterUpper($data1->other_name); ?>
+                                    <?php else: ?>
+                                        <?= makeFirstLetterUpper($data1->product); ?>
+                                    <?php endif; ?>
+                                </td>
                                 <td data-item="quantity"><?= $data1->quantity; ?></td>
+                                <td data-item="unit"><?= makeFirstLetterUpper($data1->unit); ?></td>
                                 <td data-item="price_unit" data-item-val=<?= $data1->price_unit; ?> class="text-right"><?= formatRupiah($data1->price_unit); ?></td>
                                 <td data-item="item_discount"><?= $data1->item_discount; ?></td>
                                 <td data-item="total" data-item-val=<?= $item; ?> class="text-right"><?= formatRupiah($item); ?></td>
-                                <td data-item="status"><?= $data1->status; ?></td>
+                                <!-- <td data-item="status"><?= $data1->status; ?></td> -->
                                 <?php if($data1->status==0): ?>
-                                    <?php if($poData[0]->quo==null || $poData[0]->quo=="" || empty($poData[0])): ?>
+                                    <?php if($poData[0]->quo==null || $poData[0]->quo=="" || empty($poData[0]->quo)): ?>
                                     <?php if($poData[0]->cbid==substr($_SESSION['sim-id'], 3, -3)): ?>
-                                        <!-- Single button by Bootstrap -->
+                                        
                                         <td class="text-center">
                                             <div class="btn-group">
                                                 <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -417,11 +425,9 @@ $priceTotal=0;
                                                     <li><a href="#" class="btn-modal btn-action" data-id="remove-po-item"><span class="glyphicon glyphicon-remove"></span> Remove</a></li>
                                                 </ul>
                                             </div>
-                                        </td>
-                                        <!-- <td class="text-center"><button type="button" class="btn btn-sm btn-primary"><span class="glyphicon glyphicon-pencil"></span> Update</button></td>
-                                        <td class="text-center"><button type="button" class="btn btn-sm btn-danger"><span class="glyphicon glyphicon-remove"></span> Remove</button></td>  -->   
+                                        </td>  
                                     <?php elseif($poData[0]->abid==substr($_SESSION['sim-id'], 3, -3)): ?>
-                                        <!-- Single button by Bootstrap -->
+                                        
                                         <td class="text-center">
                                             <div class="btn-group">
                                                 <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -433,8 +439,7 @@ $priceTotal=0;
                                                 </ul>
                                             </div>
                                         </td>
-                                        <!-- td class="text-center"><button type="button" class="btn btn-success btn-sm btn-modal" id="approve-vacation-form"><span class="glyphicon glyphicon-ok"></span> Setuju</button></td>
-                                        <td class="text-center"><button type="button" class="btn btn-danger btn-sm btn-modal" id="reject-vacation-form"><span class="glyphicon glyphicon-remove"></span> Ditolak</button></td> -->
+
                                     <?php else: ?>
                                         <td class="text-center">---</td>
                                     <?php endif; ?>
@@ -444,7 +449,6 @@ $priceTotal=0;
                                 <?php else: ?>
                                     <td class="text-center">---</td>
                                 <?php endif; ?>
-
                             </tr>
                         <?php endforeach; ?>
                     </table>

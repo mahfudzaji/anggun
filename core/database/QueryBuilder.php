@@ -23,7 +23,7 @@ class QueryBuilder{
     }
 
     public function getAllData($table, $forClass){
-        $statement=$this->pdo->prepare("SELECT * FROM {$table}");
+        $statement=$this->pdo->prepare("SELECT * FROM {$table} ORDER BY 2 ASC");
         $statement->execute();
         return $statement->fetchAll(PDO::FETCH_CLASS, $forClass);       
     }

@@ -15,7 +15,7 @@ ini_set("display_errors",1);
 
     <meta name="description" content="web-based application to help handling data and simplify the work task. created for sentra netcomindo.">
 
-    <title>Simplify | <?= $titlePage ?> </title>
+    <title>Anggun | <?= $titlePage ?> </title>
 
     <link rel="shortcut icon" href="/public/image/icon.png">
 

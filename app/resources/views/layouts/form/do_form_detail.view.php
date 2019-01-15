@@ -74,6 +74,83 @@ $printBtn = false;
             </div>
         </div>
 
+        <!-- UPDATE DO ITEM -->
+        <div class="app-form modal" id="modal-update-do-item">         
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Perbaharui Data <?= $titlePage; ?></h3>
+                </div>
+
+                <div class="description">
+                    <p>Form ini digunakan untuk memperbaharui data <?= $titlePage; ?>.</p>
+                    <p><span style="color:red;">*</span>Catatan: <br> Setelah mengirim form, kemudian upload bukti dan beri notes jika diperlukan</p>
+                </div>
+                <form action="/stock/update" method="post">
+                    <input type="hidden" name="do-item" value="">
+                    <div class="form-group">
+                        <label>Product</label>
+                        <select name="product" class="form-control select-product" required>
+                            <option value=''>PRODUK</option>
+                            <?php foreach($products as $product): ?>
+                                <option value=<?= $product->id ?> title=<?= $product->description ?> ><?= ucfirst($product->name).'|'.strtoupper($product->part_number); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Quantity</label>
+                        <input type="number" name="quantity" min=0 class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Unit</label>
+                        <input type="text" name="unit" class="form-control" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Date</label>
+                        <input type="date" name="receive_send_date" class="form-control" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Remark</label>
+                        <textarea name="remark" class="form-control"></textarea>
+                    </div>
+
+                    <div class="app-form modal ta" style="display:none;">
+                        <div class="modal-content">
+                            <textarea name="other_name" class="other-name"></textarea>
+                            <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span></button>
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn btn-danger btn-close" >Tutup</button>
+
+                    <div class="nav-right">
+                        <button type="submit" name="submit" class="btn btn-primary btn-next">Kirim <span class="glyphicon glyphicon-send"></span></button>
+                    </div>
+                </form>
+                <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span> </button>
+            </div>
+        </div>
+
+        <!-- REMOVE DO ITEM -->
+        <div class="app-form modal" id="modal-remove-do-item">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Konfirmasi</h3>
+                </div>
+                <div class="modal-main-content">
+                    <form action="/stock/remove" method="post">
+                        <input type="hidden" name="do-item" value="">
+                        <button type="submit" class="btn btn-danger btn-sm form-control"><span class="glyphicon glyphicon-remove"></span> Hapus data</button>
+                    </form>
+                </div>
+                <br><button class="btn btn-danger btn-close clear" >Tutup</button>
+                <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span> </button>
+            </div>
+        </div>
+
         <!-- UPDATE DO FORM -->
         <div class="app-form modal" id="modal-update-do-form">         
             <div class="modal-content">
@@ -181,6 +258,7 @@ $printBtn = false;
             <p class="description"></p>            
         </div>
 
+        <!-- ADD ITEM -->
         <div class="app-form modal" id="modal-add-stock-item">
             <div class="modal-content">
                 <div class="modal-header">
@@ -193,10 +271,10 @@ $printBtn = false;
                     <input type="hidden" name="do_type" value=<?= $doData[0]->do_type; ?>>
                     <div class="form-group">
                         <label>Product</label>
-                        <select name="product" class="form-control" required>
+                        <select name="product" class="form-control select-product" required>
                             <option value=''>PRODUCT</option>
                             <?php foreach($doItems as $item): ?> 
-                                <option value= <?= $item->product; ?> data-qty=<?= $item->quantity ?>><?= ucfirst($item->name); ?></option>             
+                                <option value= <?= $item->pid; ?> data-qty=<?= $item->quantity ?>><?= ucfirst($item->product); ?></option>             
                             <?php endforeach; ?>
                         </select>
                     </div>
@@ -212,7 +290,20 @@ $printBtn = false;
                         <label>Jumlah</label>
                         <input type="number" class="form-control" name="quantity" min=1 step=1 required>
                     </div>
-
+                    <div class="form-group">
+                        <label>Unit</label>
+                        <input type="text" class="form-control" name="unit" placeholder="Satuan" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Remark</label>
+                        <textarea name="remark" class="form-control" placeholder="Keterangan tambahan"></textarea>
+                    </div>
+                    <div class="app-form modal ta" style="display:none;">
+                        <div class="modal-content">
+                            <textarea name="other_name" class="other-name"></textarea>
+                            <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span></button>
+                        </div>
+                    </div>
                     <button type="button" class="btn btn-danger btn-close">Tutup</button>
                     <button type="submit" class="btn btn-primary" style="float:right;">Kirim <span class="glyphicon glyphicon-send"></span></button>
                 
@@ -321,16 +412,38 @@ $printBtn = false;
                         <?php else: $printBtn=true; ?>
                             <table class="table table-striped">
                                 <thead>
-                                    <th>Produk</th>
+                                    <th>Product</th>
                                     <th>Quantity</th>
+                                    <th>Unit</th>
                                     <th><?= $doData[0]->do_type==1?"Diterima":"Dikirim"; ?></th>
+                                    <th>Remark</th>
+                                    <th>Action</th>
                                 </thead>
                                 <tbody>
                                     <?php foreach($receivedItems as $item): ?>
-                                        <tr>
-                                            <td><?= $item->product; ?></td>
-                                            <td><?= $item->qty; ?></td>
-                                            <td><?= $doData[0]->do_type==1?$item->received_at:$item->send_at; ?></td>
+                                        <tr id=<?= $item->ids; ?>>
+                                            <td data-item="product" data-item-val="<?= $item->pid; ?>">
+                                            <?php if($item->other_name!=null || $item->other_name!="" || !empty($item->other_name)): ?>
+                                                <?= makeFirstLetterUpper($item->other_name); ?>
+                                            <?php else: ?>
+                                                <?= makeFirstLetterUpper($item->product); ?>
+                                            <?php endif; ?>
+                                            </td>
+                                            <td data-item="quantity"><?= $item->qty; ?></td>
+                                            <td data-item="unit"><?= makeFirstLetterUpper($item->unit); ?></td>
+                                            <td data-item="date" data-item-val="<?= $doData[0]->do_type==1?$item->idra:$item->idsa; ?>"><?= $doData[0]->do_type==1?$item->received_at:$item->send_at; ?></td>
+                                            <td data-item="remark"><?= $item->remark; ?></td>
+                                            <td>
+                                                <div class="btn-group">
+                                                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                        Action <span class="caret"></span>
+                                                    </button>
+                                                    <ul class="dropdown-menu">
+                                                        <li><a href="#" class="btn-modal btn-action" data-id="update-do-item"><span class="glyphicon glyphicon-pencil"></span> Update</a></li>
+                                                        <li><a href="#" class="btn-modal btn-action" data-id="remove-do-item"><span class="glyphicon glyphicon-remove"></span> Remove</a></li>
+                                                    </ul>
+                                                </div>
+                                            </td>  
                                         </tr>
                                     <?php endforeach; ?>
                                 </tbody>
@@ -385,7 +498,21 @@ $(document).ready(function(){
 
     $('#remark').trumbowyg();
 
-    /* UPDATE DO ITEM */
+    $("textarea.other-name").trumbowyg();
+
+    $("form").on("change", ".select-product", function(){
+        var option = $(this).val();
+        alert
+        if(option==3){
+            $(this).closest("form").find(".ta").show();
+        }else{
+            $(this).closest("form").find("textarea[name~='other_name']").trumbowyg('html', "");
+		    //$(this).find("textarea[name~='other_name']").trumbowyg('html');
+        }
+        
+    })
+
+    /* UPDATE DO FORM */
     $(".btn-action").on("click", function(){
         var dataId= $(this).attr("data-id");
 
@@ -409,6 +536,41 @@ $(document).ready(function(){
             $("#modal-update-do-form").find("input[name~='do_number']").val(doNumber);
 
         }
+    });
+
+    /* UPDATE DO ITEM */
+    $(".btn-action").on("click", function(){
+        var dataId= $(this).attr("data-id");
+
+        var doItem = $(this).parent().closest("tr").attr("id");
+        var product='';
+        var quantity='';
+        var unit='';
+        var date='';
+        var remark='';
+
+        if(dataId=='update-do-item'){     
+             
+            product = $(this).parent().closest("tr").find("[data-item~='product']").attr("data-item-val");
+            quantity = $(this).parent().closest("tr").find("[data-item~='quantity']").html();
+            unit = $(this).parent().closest("tr").find("[data-item~='unit']").html();
+            date = $(this).parent().closest("tr").find("[data-item~='date']").attr("data-item-val");
+            remark = $(this).parent().closest("tr").find("[data-item~='remark']").html();
+
+            console.log(product);
+            console.log(date);
+            $("#modal-update-do-item").find("input[name~='do-item']").val(doItem);
+            //$("#modal-update-do-item").find("select[name~='product']").find("option").attr("selected", false);
+            $("#modal-update-do-item").find("select[name~='product']").find("option[value~='"+product+"']").attr("selected", true);
+            $("#modal-update-do-item").find("input[name~='quantity']").val(quantity);  
+            $("#modal-update-do-item").find("input[name~='unit']").val(unit);  
+            $("#modal-update-do-item").find("input[name~='receive_send_date']").val(date);  
+            $("#modal-update-do-item").find("textarea[name~='remark']").val(remark); 
+            
+        }else{
+            $("#modal-remove-do-item").find("input[name~='do-item']").val(doItem);
+        }
+        
     });
 
     /* SHOW ATTACHMENT */

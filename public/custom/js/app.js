@@ -156,7 +156,7 @@ $("document").ready(function(){
     $("form").on("click", ".btn-add-input-form", function(){
         var clone=$(this).closest(".modal-wizard").find(".inline-input:first").clone();
         $(this).closest(".modal-wizard").find(".inline-input:last").after(clone);
-        $(this).closest(".modal-wizard").find(".inline-input:last").find("input[type='text'], input[type~='date'], input[type~='number']").val('');
+        $(this).closest(".modal-wizard").find(".inline-input:last").find("input[type='text'], input[type~='date'], input[type~='number'], textarea").val('');
         $(this).closest(".modal-wizard").find(".inline-input:last").append("<button type='button' class='btn btn-danger btn-float'><span class='glyphicon glyphicon-trash'></span></button>");
     });
 
@@ -287,5 +287,19 @@ $("document").ready(function(){
         var caret = $(this).find(".caret");
         caret.toggleClass("down")
     });
+
+    $("textarea[name~='other_name[]']").trumbowyg();
+
+    $("form").on("change", "select[name~='product[]']", function(){
+        var option = $(this).val();
+
+        if(option==3){
+            $(this).closest(".inline-input").find(".ta").show();
+        }else{
+            $(this).closest(".inline-input").find("textarea[name~='other_name[]']").trumbowyg('html', "");
+		    //$(this).closest(".inline-input").find("textarea[name~='other_name[]']").trumbowyg('html');
+        }
+        
+    })
 
 });

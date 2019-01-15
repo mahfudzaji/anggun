@@ -305,6 +305,8 @@ class PrintController{
             a.product as pid,
             a.quantity, 
             a.price_unit,
+            a.unit,
+            a.other_name,
             a.item_discount,
             a.quantity*a.price_unit as total,
             a.status  
@@ -354,6 +356,8 @@ class PrintController{
             a.quantity, 
             a.price_unit,
             a.item_discount,
+            a.unit,
+            a.other_name,
             a.quantity*a.price_unit as total,
             a.status 
             FROM `quo_product` as a 
@@ -445,6 +449,8 @@ class PrintController{
         a.product as pid,
         a.quantity, 
         a.price_unit,
+        a.unit,
+        a.other_name,
         a.item_discount,
         a.quantity*a.price_unit as total,
         a.status as sid,
@@ -459,6 +465,8 @@ class PrintController{
         a.product as pid,
         a.quantity, 
         a.price_unit,
+        a.unit,
+        a.other_name,
         a.item_discount,
         a.quantity*a.price_unit as total,
         a.status as sid,

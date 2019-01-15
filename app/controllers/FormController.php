@@ -89,7 +89,9 @@ class FormController{
             "product" => 'required',
             "quantity" => 'required',
             "price_unit" => 'required',
-            "item_discount" => ''
+            "item_discount" => '',
+            "other_name" => '',
+            "unit" => 'required'
         ]
     );
 
@@ -117,7 +119,9 @@ class FormController{
             "product" => 'required',
             "quantity" => 'required',
             "price" => 'required',
-            "discount" => ''
+            "discount" => '',
+            "other_name" => '',
+            "unit" => 'required'
         ]
     );
 
@@ -1940,7 +1944,12 @@ class FormController{
     public function receiptFormDetail(){
 
         if(!array_key_exists('superadmin', $this->roleOfUser)){
-            redirectWithMessage([["Anda tidak memiliki hak untuk memasuki menu ini", 0]], getLastVisitedPage());
+            if(isset($_SERVER['HTTP_X_REQUESTED_WITH']) && !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest'){
+                echo '{"access":false}';
+                exit();
+            }else{
+                redirectWithMessage([["Anda tidak memiliki hak untuk memasuki menu ini", 0]], getLastVisitedPage());
+            }
         }
 
         $id = filterUserInput($_GET['r']);
@@ -2009,13 +2018,19 @@ class FormController{
             redirectWithMessage([['Data tidak tersedia atau telah dihapus',0]], '/form/receipt');
         }
 
-        $receiptItems = $builder->custom("SELECT b.id, b.product as pid, c.name as product, b.quantity, b.price, b.discount
+        $receiptItems = $builder->custom("SELECT b.id, c.part_number, b.product as pid, c.name as product, b.quantity, b.unit, b.other_name, b.remark, b.price, b.discount
         FROM form_receipt as a 
         INNER JOIN receipt_product as b on b.receipt=a.id
         INNER JOIN products as c on b.product=c.id 
         WHERE a.id=$id", "Document");
 
-        view('form/receipt_form_detail', compact('receiptData', 'receiptItems', 'receivedItems', 'attachments', 'uploadFiles', 'partners', 'products'));
+        if(isset($_SERVER['HTTP_X_REQUESTED_WITH']) && !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest'){
+            echo json_encode(["receiptData"=>$receiptData, "receiptItems"=>$receiptItems]);
+            exit();
+        }else{
+            view('form/receipt_form_detail', compact('receiptData', 'receiptItems', 'receivedItems', 'attachments', 'uploadFiles', 'partners', 'products'));
+        }
+
     }
 
     public function receiptFormUpdate(){
@@ -2307,6 +2322,47 @@ class FormController{
 
         //redirect to form page with message
         redirectWithMessage([[ "Menambahkan receipt item berhasil" ,1]],getLastVisitedPage());
+    }
+
+    public function receiptFormNumber(){
+        if(!array_key_exists('superadmin', $this->roleOfUser)){
+            if(isset($_SERVER['HTTP_X_REQUESTED_WITH']) && !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest'){
+                echo '{"access":false}';
+                exit();
+            }else{
+                redirectWithMessage([["Anda tidak memiliki hak untuk memasuki menu ini", 0]], getLastVisitedPage());
+            }
+        }
+
+        $builder = App::get('builder');
+
+        $parameterData=[];
+        $parameters = $builder->getAllData('default_parameter', 'Internal');
+        for($i=0; $i<count($parameters); $i++){
+            $parameterData[$parameters[$i]->parameter]=$parameters[$i]->value;
+        }
+
+        $company = $parameterData['company'];
+
+        //$status=1 -> Receipt in
+        //$status=2 -> Receipt out
+        $status = filterUserInput($_GET['status']);
+
+        if(isset($_GET['status'])&&!empty($_GET['status'])&&$_GET['status']!=''){     
+            if($status==1){
+                $whereClause="buyer=$company";
+            }elseif($status==2){
+                $whereClause="supplier=$company";
+            }
+        }
+
+        $doNumber = $builder->custom("SELECT id, receipt_number as doc_number 
+        FROM form_receipt 
+        WHERE $whereClause
+        ORDER BY id" , "Document");
+        
+        echo json_encode($doNumber);
+
     }
 
 //=====================================================================================================//   
@@ -2674,7 +2730,9 @@ class FormController{
 
             $quoDetailData = $builder->custom("SELECT a.id, IFNULL(c.part_number, '-') as part_number, c.name as product, 
             a.product as pid,
+            a.other_name,
             a.quantity, 
+            a.unit,
             a.price_unit,
             a.item_discount,
             a.quantity*a.price_unit as total,
@@ -2724,7 +2782,9 @@ class FormController{
 
             $quoDetailData = $builder->custom("SELECT a.id, IFNULL(c.part_number, '-') as part_number, c.name as product, 
             a.product as pid,
+            a.other_name,
             a.quantity, 
+            a.unit,
             a.price_unit,
             a.item_discount,
             a.quantity*a.price_unit as total,
@@ -3410,6 +3470,8 @@ class FormController{
             redirectWithMessage([[ returnMessage()['poForm']['accessRight']['create'] , 0]], getLastVisitedPage());
         }
 
+        //dd($_POST);
+
         //checking form requirement
         $data=[];
         
@@ -3661,7 +3723,9 @@ class FormController{
 
         $poDetailData = $builder->custom("SELECT a.id, IFNULL(c.part_number, '-') as part_number, c.name as product, 
         a.product as pid,
+        a.other_name,
         a.quantity, 
+        a.unit,
         a.price_unit,
         a.item_discount,
         a.quantity*a.price_unit as total,
@@ -3675,7 +3739,9 @@ class FormController{
         UNION
         SELECT a.id, IFNULL(c.part_number, '-') as part_number, c.name as product, 
         a.product as pid,
+        a.other_name,
         a.quantity, 
+        a.unit,
         a.price_unit,
         a.item_discount,
         a.quantity*a.price_unit as total,
@@ -4358,8 +4424,14 @@ class FormController{
     }
 
     public function doFormDetail(){
+
         if(!$this->role->can('view-data-do')){
-            redirectWithMessage([[ returnMessage()['doForm']['accessRight']['view'] , 0]], getLastVisitedPage());
+            if(isset($_SERVER['HTTP_X_REQUESTED_WITH']) && !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest'){
+                echo '{"access":false}';
+                exit();
+            }else{
+                redirectWithMessage([[ returnMessage()['doForm']['accessRight']['view'] , 0]], getLastVisitedPage());
+            } 
         }
 
         $id = filterUserInput($_GET['do']);
@@ -4367,6 +4439,8 @@ class FormController{
         $builder = App::get('builder');
 
         $vendors = $builder->getAllData("vendors", "Product");
+
+        $products=$builder->getAllData('products', 'Product');
 
         $parameterData=[];
         $parameters = $builder->getAllData('default_parameter', 'Internal');
@@ -4417,16 +4491,24 @@ class FormController{
             $whereClause = 1;
         }
 
-        $receivedItems = $builder->custom("SELECT b.name as product, a.quantity as qty, 
+        /* $receivedItems = $builder->custom("SELECT b.name as product, a.quantity as qty, 
         DATE_FORMAT(a.received_at, '%d %M %Y') as received_at,DATE_FORMAT(a.send_at, '%d %M %Y') as send_at
         FROM `stocks` as a 
         INNER JOIN products as b on a.product=b.id 
         INNER JOIN stock_relation as c on a.stock_relation=c.id
         WHERE c.document=6 and c.spec_doc=$id && $whereClause 
-        GROUP BY a.product","Document");
+        GROUP BY a.product","Document"); */
+
+        $receivedItems = $builder->custom("SELECT a.id as ids, b.id as pid, b.name as product, a.quantity as qty, a.unit, a.other_name,
+        DATE_FORMAT(a.received_at, '%d %M %Y') as received_at,DATE_FORMAT(a.send_at, '%d %M %Y') as send_at,
+        a.received_at as idra, a.send_at as idsa, a.status, a.remark
+        FROM `stocks` as a 
+        INNER JOIN products as b on a.product=b.id 
+        INNER JOIN stock_relation as c on a.stock_relation=c.id
+        WHERE c.document=6 and c.spec_doc=$id && $whereClause","Document");
 
         //Get the PO product for processed to DO item
-        $doItems = $builder->custom("SELECT h.product, i.name, h.quantity
+        $doItems = $builder->custom("SELECT h.product as pid, i.part_number, i.name as product, h.quantity
         FROM form_do as a 
         INNER JOIN po_quo as d on a.po_quo=d.id
         INNER JOIN form_po as e on d.po=e.id
@@ -4435,7 +4517,7 @@ class FormController{
         WHERE a.id=$id
         GROUP BY i.id
         UNION
-        SELECT h.product, i.name, h.quantity
+        SELECT h.product as pid, i.part_number, i.name as product, h.quantity
         FROM form_do as a 
         INNER JOIN po_quo as d on a.po_quo=d.id
         INNER JOIN form_quo as e on d.quo=e.id
@@ -4449,8 +4531,13 @@ class FormController{
             redirectWithMessage([['Data tidak tersedia atau telah dihapus',0]], '/form/quo');
         }
 
+        if(isset($_SERVER['HTTP_X_REQUESTED_WITH']) && !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest'){
+            echo json_encode(["doData"=>$doData, "doItems"=>$doItems]);
+            exit();
+        }else{
+            view('form/do_form_detail', compact('doData', 'attachments', 'uploadFiles', 'doItems', 'vendors', 'receivedItems', 'products'));
+        }
 
-        view('form/do_form_detail', compact('doData', 'attachments', 'uploadFiles', 'doItems', 'vendors', 'receivedItems'));
     }
 
     public function doFormApproval(){
@@ -4568,6 +4655,49 @@ class FormController{
         $builder->save();
 
         redirectWithMessage([[returnMessage()['doForm']['deleteSuccess'], 1]], '/form/do');
+
+    }
+
+    public function doFormNumber(){
+        if(!$this->role->can("view-data-do")){
+            if(isset($_SERVER['HTTP_X_REQUESTED_WITH']) && !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest'){
+                echo '{"access":false}';
+                exit();
+            }else{
+                redirectWithMessage([[ returnMessage()['doForm']['accessRight']['view'] , 0]], getLastVisitedPage());
+            }
+        }
+
+        $builder = App::get('builder');
+
+        $parameterData=[];
+        $parameters = $builder->getAllData('default_parameter', 'Internal');
+        for($i=0; $i<count($parameters); $i++){
+            $parameterData[$parameters[$i]->parameter]=$parameters[$i]->value;
+        }
+
+        $company = $parameterData['company'];
+
+        //$status=1 -> DO in
+        //$status=2 -> DO out
+        $status = filterUserInput($_GET['status']);
+
+        if(isset($_GET['status'])&&!empty($_GET['status'])&&$_GET['status']!=''){     
+            if($status==1){
+                $whereClause="c.buyer=$company";
+            }elseif($status==2){
+                $whereClause="c.supplier=$company";
+            }
+        }
+
+        $doNumber = $builder->custom("SELECT a.id, a.do_number as doc_number
+        FROM form_do as a
+        INNER JOIN po_quo as b on a.po_quo=b.id
+        INNER JOIN form_po as c on b.po=c.id 
+        WHERE $whereClause
+        ORDER BY a.id" , "Document");
+        
+        echo json_encode($doNumber);
 
     }
 

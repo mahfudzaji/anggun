@@ -242,7 +242,7 @@ $printBtn = false;
                             <input type="date" class="form-control" name="receive_send_date" required>
                         </div>
                         <div class="row inline-input">
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <div class="form-group">
                                     <label>Produk</label>
                                     <select name="product[]" class="form-control" required>
@@ -253,15 +253,21 @@ $printBtn = false;
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <div class="form-group">
                                     <label>Jumlah</label>
                                     <input type="number" min=0 name="quantity[]" class="form-control" required>
                                 </div>
                             </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Satuan</label>
+                                    <input type="text" name="unit[]" class="form-control" required>
+                                </div>
+                            </div>
                             <div class="col-md-3">
                                 <div class="form-group">
-                                    <label>Harga satuan</label>
+                                    <label>Harga</label>
                                     <input type="number" min=0 name="price[]" class="form-control" required>
                                 </div>
                             </div>
@@ -269,6 +275,12 @@ $printBtn = false;
                                 <div class="form-group">
                                     <label>Disc (%)</label>
                                     <input type="number" min=0 name="discount[]" class="form-control">
+                                </div>
+                            </div>
+                            <div class="app-form modal ta" style="display:none;">
+                                <div class="modal-content">
+                                    <textarea name="other_name[]" ></textarea>
+                                    <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span></button>
                                 </div>
                             </div>
                         </div>
@@ -326,19 +338,29 @@ $printBtn = false;
                                 <thead>
                                     <th>Produk</th>
                                     <th>Quantity</th>
+                                    <th>Unit</th>
                                     <th>Price unit</th>
                                     <th>Discount(%)</th>
                                     <th>Price total</th>
+                                    <th>Remark</th>
                                     <th class="text-center">Action</th>
                                 </thead>
                                 <tbody>
                                     <?php foreach($receiptItems as $item): $priceTotal=0; $price=(100-$item->discount)*$item->price*0.01; $priceTotal=$price*$item->quantity;  ?>
                                         <tr id=<?= $item->id; ?>>
-                                            <td data-item="product" data-item-val=<?= $item->pid; ?>><?= $item->product; ?></td>
+                                            <td data-item="product" data-item-val=<?= $item->pid; ?>>
+                                                <?php if($item->other_name!=null || $item->other_name!="" || !empty($item->other_name)): ?>
+                                                    <?= makeFirstLetterUpper($item->other_name); ?>
+                                                <?php else: ?>
+                                                    <?= makeFirstLetterUpper($item->product); ?>
+                                                <?php endif; ?>
+                                            </td>
                                             <td data-item="quantity"><?= $item->quantity; ?></td>
+                                            <td data-item="unit"><?= makeFirstLetterUpper($item->unit); ?></td>
                                             <td data-item="price" data-item-val=<?= $item->price; ?> class="text-right"><?= formatRupiah($item->price); ?></td>
                                             <td data-item="discount"><?= $item->discount; ?></td>
                                             <td data-item="total" data-item-val=<?= $item->price; ?> class="text-right"><?= formatRupiah($priceTotal); ?></td>
+                                            <td data-item="remark"><?= $item->remark; ?></td>
                                             <td class="text-center">
                                                 <div class="btn-group">
                                                     <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">

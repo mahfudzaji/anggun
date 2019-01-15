@@ -182,12 +182,19 @@ $priceTotal=0;
                     <input type="hidden" name="quo-item" value="">
                     <div class="form-group">
                         <label>Product</label>
-                        <select name="product" class="form-control" required>
+                        <select name="product" class="form-control select-product" required>
                             <option value=''>PRODUK</option>
                             <?php foreach($products as $product): ?>
                                 <option value=<?= $product->id ?> title=<?= $product->description ?> ><?= ucfirst($product->name).'|'.strtoupper($product->part_number); ?></option>
                             <?php endforeach; ?>
                         </select>
+                    </div>
+
+                    <div class="app-form modal ta" style="display:none;">
+                        <div class="modal-content">
+                            <textarea name="other_name" class="other-name"></textarea>
+                            <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span></button>
+                        </div>
                     </div>
                     
                     <div class="form-group">
@@ -196,7 +203,12 @@ $priceTotal=0;
                     </div>
                     
                     <div class="form-group">
-                        <label>Price unit</label>
+                        <label>Satuan</label>
+                        <input type="text" name="unit" placeholder="satuan" class="form-control" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Price</label>
                         <input type="number" name="price_unit" min=0 class="form-control" required>
                     </div>
 
@@ -305,7 +317,7 @@ $priceTotal=0;
                     <?= (isset($_GET['revision']) && !empty($_GET['revision']))?"<input type='hidden' name='revision' value=".$_GET['revision'].">":"" ?>
                     <div class="form-group">
                         <label>Product</label>
-                        <select name="product" class="form-control" required>
+                        <select name="product" class="form-control select-product" required>
                             <option value=''>PRODUK</option>
                             <?php foreach($products as $product): ?>
                                 <option value=<?= $product->id ?> title=<?= $product->description ?> ><?= ucfirst($product->name).'|'.strtoupper($product->part_number); ?></option>
@@ -316,6 +328,18 @@ $priceTotal=0;
                     <div class="form-group">
                         <label>Quantity</label>
                         <input type="number" name="quantity" min=0 class="form-control" required>
+                    </div>
+
+                    <div class="app-form modal ta" style="display:none;">
+                        <div class="modal-content">
+                            <textarea name="other_name" class="other-name"></textarea>
+                            <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span></button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Satuan</label>
+                        <input type="text" name="unit" placeholder="satuan" class="form-control" required>
                     </div>
                     
                     <div class="form-group">
@@ -364,7 +388,7 @@ $priceTotal=0;
                         <label>Tanggal revisi</label>
                         <input type="date" name="doc_date" class="form-control" required>
                     </div>
-                    <div class="row">
+                    <div class="row inline-input">
                         <input type="hidden" name="quo-item[]" value="">
                         <div class="col-md-6">
                             <div class="form-group">
@@ -393,6 +417,12 @@ $priceTotal=0;
                             <div class="form-group">
                                 <label>Discount (%)</label>
                                 <input type="number" name="item_discount[]" min=0 class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="app-form modal ta" style="display:none;">
+                            <div class="modal-content">
+                                <textarea name="other_name[]" class="other-name"></textarea>
+                                <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span></button>
                             </div>
                         </div>
                     </div>
@@ -457,10 +487,10 @@ $priceTotal=0;
                                 <th>Part Number</th>
                                 <th>Product</th>
                                 <th>Quantity</th>
+                                <th>Unit</th>
                                 <th>Price unit</th>
                                 <th>Discount(%)</th>
                                 <th>Price total</th>
-                                <th>Status</th>
                                 <th class="text-center">Action</th>
                             </tr>
                         </thead>
@@ -468,12 +498,18 @@ $priceTotal=0;
                         <?php foreach($quoDetailData as $data1): $item=(100-$data1->item_discount)*$data1->total*0.01; $priceTotal+=$item; ?>
                             <tr class="quo-item" data-item=<?= $data1->id; ?>>
                                 <td data-item="part_number" data-item-val=<?= $data1->part_number; ?>><?= $data1->part_number; ?></td>
-                                <td data-item="product" data-item-val=<?= $data1->pid; ?>><?= $data1->product; ?></td>
+                                <td data-item="product" data-item-val=<?= $data1->pid; ?>>
+                                    <?php if($data1->other_name!=null || $data1->other_name!="" || !empty($data1->other_name)): ?>
+                                        <?= makeFirstLetterUpper($data1->other_name); ?>
+                                    <?php else: ?>
+                                        <?= makeFirstLetterUpper($data1->product); ?>
+                                    <?php endif; ?>
+                                </td>
                                 <td data-item="quantity"><?= $data1->quantity; ?></td>
+                                <td data-item="unit"><?= makeFirstLetterUpper($data1->unit); ?></td>
                                 <td data-item="price_unit" data-item-val=<?= $data1->price_unit; ?> class="text-right"><?= formatRupiah($data1->price_unit); ?></td>
                                 <td data-item="item_discount"><?= $data1->item_discount; ?></td>
                                 <td data-item="total" data-item-val=<?= $item; ?> class="text-right"><?= formatRupiah($item); ?></td>
-                                <td data-item="status"><?= $data1->status; ?></td>
                                 
                                 <!-- Creator -->
                                 <?php if($quoData[0]->cbid==substr($_SESSION['sim-id'], 3, -3)): ?>
@@ -583,6 +619,20 @@ $priceTotal=0;
 $(document).ready(function(){
 
     $('#remark').trumbowyg();
+
+    $("textarea.other-name").trumbowyg();
+
+    $("form").on("change", ".select-product", function(){
+        var option = $(this).val();
+        alert
+        if(option==3){
+            $(this).closest("form").find(".ta").show();
+        }else{
+            $(this).closest("form").find("textarea[name~='other_name']").trumbowyg('html', "");
+		    //$(this).find("textarea[name~='other_name']").trumbowyg('html');
+        }
+        
+    })
 
     /* SHOW ATTACHMENT */
     $("select[name~='attachment']").on("change", function(){

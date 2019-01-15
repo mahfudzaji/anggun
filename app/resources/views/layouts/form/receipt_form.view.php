@@ -123,7 +123,7 @@ require base.'base/header.view.php';
     </div>
 
     <div class="app-form modal" id="modal-create-receipt-form">         
-        <div class="modal-content">
+        <div class="modal-content" style="width:60%">
             <div class="modal-header">
                 <h3>Tambahkan <?= $titlePage; ?></h3>
             </div>
@@ -196,7 +196,7 @@ require base.'base/header.view.php';
                     </div>
 
                     <div class="row inline-input">
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <div class="form-group">
                                 <label>Produk</label>
                                 <select name="product[]" class="form-control" required>
@@ -207,10 +207,16 @@ require base.'base/header.view.php';
                                 </select>
                             </div>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <div class="form-group">
                                 <label>Jumlah</label>
                                 <input type="number" min=0 name="quantity[]" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label>Unit</label>
+                                <input type="text" name="unit[]" class="form-control" required>
                             </div>
                         </div>
                         <div class="col-md-3">
@@ -223,6 +229,12 @@ require base.'base/header.view.php';
                             <div class="form-group">
                                 <label>Disc (%)</label>
                                 <input type="number" min=0 name="discount[]" class="form-control">
+                            </div>
+                        </div>
+                        <div class="app-form modal ta" style="display:none;">
+                            <div class="modal-content">
+                                <textarea name="other_name[]" ></textarea>
+                                <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span></button>
                             </div>
                         </div>
                     </div>
@@ -266,9 +278,8 @@ require base.'base/footer.view.php'
 
 <script type="text/javascript">
     
-
     $(document).ready(function(){
-		
+
 		$('#remark').trumbowyg();
 
         $("#create-receipt-form").on("click", function(){

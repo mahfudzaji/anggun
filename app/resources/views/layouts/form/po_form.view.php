@@ -132,215 +132,231 @@ require base.'base/header.view.php';
     </div>
 
     <div class="app-form modal" id="modal-create-po-form">         
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3>Tambahkan <?= $titlePage; ?></h3>
-                </div>
-                
-                <div>
-                    <h3 class="text-center">Ada quotation?</h3>
-                    <div class="row">
-                        <div class="col-md-6 text-center">
-                            <button class="btn btn-lg btn-success btn-modal-toggle" id="with-quo-form">ADA</button>
-                        </div>
-                        <div class="col-md-6 text-center">
-                            <button class="btn btn-lg btn-default btn-modal-toggle" id="no-quo-form">TIDAK</button>
-                        </div>
+        <div class="modal-content" style="width:60%">
+            <div class="modal-header">
+                <h3>Tambahkan <?= $titlePage; ?></h3>
+            </div>
+            
+            <div>
+                <h3 class="text-center">Ada quotation?</h3>
+                <div class="row">
+                    <div class="col-md-6 text-center">
+                        <button class="btn btn-lg btn-success btn-modal-toggle" id="with-quo-form">ADA</button>
+                    </div>
+                    <div class="col-md-6 text-center">
+                        <button class="btn btn-lg btn-default btn-modal-toggle" id="no-quo-form">TIDAK</button>
                     </div>
                 </div>
-                <hr>
+            </div>
+            <hr>
 
-                <form action="/form/po/create-from-quo" method="POST" class="form-modal" id="modal-toggle-with-quo-form" style="display:none;">
+            <form action="/form/po/create-from-quo" method="POST" class="form-modal" id="modal-toggle-with-quo-form" style="display:none;">
+                <div class="row">
+                    <div class="col-md-6 text-center">
+                        <!-- <button class="btn btn-md btn-success btn-modal-toggle" id="po-in-form">PO IN</button> -->
+                        <input type="radio" name="po_type" value="1"><strong>PO IN</strong> 
+                    </div>
+                    <div class="col-md-6 text-center">
+                        <!-- <button class="btn btn-md btn-default btn-modal-toggle" id="po-out-form">PO OUT</button> -->
+                        <input type="radio" name="po_type" value="0" required><strong>PO OUT</strong>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label id="company-label">Dari Perusahaan</label>
+                    <select name="company" class="form-control" required>
+                        <option value="0">Perusahaan</option>
+                        <?php foreach($partners as $data): ?>
+                            <option value=<?= $data->id; ?>><?= $data->name; ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Nomor Quotation</label>
+                    <select name="quotation" class="form-control" required>
+                    </select>
+                </div>
+                <input type="hidden" name="quo_revision">
+                <div class="data-respond">
+                </div>
+                <button type="button" class="btn btn-danger btn-close" >Tutup</button>
+                <button type="submit" class="btn btn-md btn-primary" style="float:right;"><span class="glyphicon glyphicon-send"></span> Proses ke PO</button>
+            </form>
+
+            <form action="/form/po/create" method="POST" class="form-modal" id="modal-toggle-no-quo-form" style="display:none;">
+                <div class="modal-wizard show">
+                    <div class="description">
+                    </div>
                     <div class="row">
                         <div class="col-md-6 text-center">
                             <!-- <button class="btn btn-md btn-success btn-modal-toggle" id="po-in-form">PO IN</button> -->
-                            <input type="radio" name="po_type" value="1"><strong>PO IN</strong> 
+                            <input type="radio" name="po_type" value="1" checked><strong>PO IN</strong> 
                         </div>
                         <div class="col-md-6 text-center">
                             <!-- <button class="btn btn-md btn-default btn-modal-toggle" id="po-out-form">PO OUT</button> -->
-                            <input type="radio" name="po_type" value="0" required><strong>PO OUT</strong>
+                            <input type="radio" name="po_type" value="0"><strong>PO OUT</strong>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label id="company-label">Dari Perusahaan</label>
-                        <select name="company" class="form-control" required>
-                            <option value="0">Perusahaan</option>
-                            <?php foreach($partners as $data): ?>
-                                <option value=<?= $data->id; ?>><?= $data->name; ?></option>
+                        <label>Tanggal PO</label>
+                        <input type="date" name="doc_date" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>PO Number</label>
+                        <input type='text' name='po_number' class='form-control' required>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Supplier</label>
+                                <select name="supplier" class="form-control">
+                                    <option value=''>SUPPLIER</option>
+                                    <?php foreach($partners as $partner): ?>
+                                        <option value=<?= $partner->id ?> data-rel=<?= $partner->relationship; ?> ><?= ucfirst($partner->name); ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>PIC</label>
+                                <input type="text" name="pic_supplier" class="form-control" placeholder="PIC" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Buyer</label>
+                                <select name="buyer" class="form-control">
+                                    <option value=''>BUYER</option>
+                                    <?php foreach($partners as $partner): ?>
+                                        <option value=<?= $partner->id ?> ><?= ucfirst($partner->name); ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>PIC</label>
+                                <input type="text" name="pic_buyer" class="form-control" placeholder="PIC" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Mata uang</label>
+                        <select name="currency" class="form-control">
+                            <option value=''>MATA UANG</option>
+                            <option value='1'>Rupiah</option>
+                            <option value='2'>Dollar</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-wizard">
+                    <div class="description">
+                        <p>Pilih produk sesuai barang yang diserahterimakan. Apabila barang tidak terdaftar maka daftarkan terlebih dahulu atau pilih
+                        produk 'lain-lain'. <br>Kemudian tuliskan serial number, apabila tidak terdapat keterangan serial number maka beri tanda '-' dan kemudian tuliskan keterangan tambahan yang diperlukan.</p>
+                    </div>
+
+                    <div class="row inline-input">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>Produk</label>
+                                <select name="product[]" class="form-control" required>
+                                    <option value=''>PRODUK</option>
+                                    <?php foreach($products as $product): ?>
+                                        <?php if($product->name=='Other'): ?>
+                                            <option title="<?= $product->name; ?>" value=<?= $product->id ?> class="other-name"><?= (strlen($product->name)>50)?substr(ucfirst($product->name),0, 50)."...":ucfirst($product->name); ?></option>
+                                        <?php else: ?>
+                                            <option title="<?= $product->name; ?>" value=<?= $product->id ?>><?= (strlen($product->name)>50)?substr(ucfirst($product->name),0, 50)."...":ucfirst($product->name); ?></option>
+                                        <?php endif; ?>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label>Jumlah</label>
+                                <input type="number" min=0 name="quantity[]" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label>Satuan</label>
+                                <input type="text" name="unit[]" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>Harga satuan</label>
+                                <input type="number" min=0 name="price_unit[]" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label>Diskon (%)</label>
+                                <input type="number" min=0 name="item_discount[]" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="app-form modal ta" style="display:none;">
+                            <div class="modal-content">
+                                <textarea name="other_name[]" ></textarea>
+                                <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span></button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!--<span><button class="btn btn-danger btn-float"><span class="glyphicon glyphicon-trash"></span></button></span>-->
+                    <button type="button" class="btn btn-default btn-add-input-form">Tambah</button>
+                    
+                    <div class="form-group">
+                        <label>Keterangan tambahan</label>
+                        <textarea name="remark" class="form-control" placeholder="Keterangan tambahan"></textarea>
+                    </div>
+                </div>
+                <div class="modal-wizard">
+                    <div class="description">
+                        <p>Form ini digunakan untuk menambahkan data tanda terima. Form ini digunakan untuk menambahkan data tanda terima.</p>
+                        <dl>
+                        <dt>Catatan</dt>
+                            <dd>Pinjam: pihak asal(<em>dari</em>) meminjamkan barang kepada yang sebagai tujuan(<em>untuk</em>)</dd>
+                            <dd>Serah terima: pihak asal(<em>dari</em>) melakukan serah terima barang ke pihak tujuan(<em>untuk</em>) 
+                        </dl>
+                    </div>
+                    <div class="form-group">
+                        <label>PPN</label>
+                        <input type="number" min=0 name="ppn" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Diketahui oleh</label>
+                        <select name="acknowledged_by" class="form-control" required>
+                            <option value=''>-</option>
+                            <?php foreach($approvalPerson as $person): ?>
+                                <option value=<?= $person->user_id ?>><?= ucfirst($person->name); ?></option>
                             <?php endforeach; ?>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Nomor Quotation</label>
-                        <select name="quotation" class="form-control" required>
+                        <label>Disetujui oleh</label>
+                        <select name="approved_by" class="form-control" required>
+                            <option value=''>-</option>
+                            <?php foreach($approvalPerson as $person): ?>
+                                <option value=<?= $person->user_id ?>><?= ucfirst($person->name); ?></option>
+                            <?php endforeach; ?>
                         </select>
                     </div>
-                    <input type="hidden" name="quo_revision">
-                    <div class="data-respond">
-                    </div>
-                    <button type="button" class="btn btn-danger btn-close" >Tutup</button>
-                    <button type="submit" class="btn btn-md btn-primary" style="float:right;"><span class="glyphicon glyphicon-send"></span> Proses ke PO</button>
-                </form>
+                </div>
 
-                <form action="/form/po/create" method="POST" class="form-modal" id="modal-toggle-no-quo-form" style="display:none;">
-                    <div class="modal-wizard show">
-                        <div class="description">
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6 text-center">
-                                <!-- <button class="btn btn-md btn-success btn-modal-toggle" id="po-in-form">PO IN</button> -->
-                                <input type="radio" name="po_type" value="1" checked><strong>PO IN</strong> 
-                            </div>
-                            <div class="col-md-6 text-center">
-                                <!-- <button class="btn btn-md btn-default btn-modal-toggle" id="po-out-form">PO OUT</button> -->
-                                <input type="radio" name="po_type" value="0"><strong>PO OUT</strong>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label>Tanggal PO</label>
-                            <input type="date" name="doc_date" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label>PO Number</label>
-                            <input type='text' name='po_number' class='form-control' required>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Supplier</label>
-                                    <select name="supplier" class="form-control">
-                                        <option value=''>SUPPLIER</option>
-                                        <?php foreach($partners as $partner): ?>
-                                            <option value=<?= $partner->id ?> data-rel=<?= $partner->relationship; ?> ><?= ucfirst($partner->name); ?></option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>PIC</label>
-                                    <input type="text" name="pic_supplier" class="form-control" placeholder="PIC" required>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Buyer</label>
-                                    <select name="buyer" class="form-control">
-                                        <option value=''>BUYER</option>
-                                        <?php foreach($partners as $partner): ?>
-                                            <option value=<?= $partner->id ?> ><?= ucfirst($partner->name); ?></option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>PIC</label>
-                                    <input type="text" name="pic_buyer" class="form-control" placeholder="PIC" required>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label>Mata uang</label>
-                            <select name="currency" class="form-control">
-                                <option value=''>MATA UANG</option>
-                                <option value='1'>Rupiah</option>
-                                <option value='2'>Dollar</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="modal-wizard">
-                        <div class="description">
-                            <p>Pilih produk sesuai barang yang diserahterimakan. Apabila barang tidak terdaftar maka daftarkan terlebih dahulu atau pilih
-                            produk 'lain-lain'. <br>Kemudian tuliskan serial number, apabila tidak terdapat keterangan serial number maka beri tanda '-' dan kemudian tuliskan keterangan tambahan yang diperlukan.</p>
-                        </div>
+                <button type="button" class="btn btn-danger btn-back" style="display:none;"><span class="glyphicon glyphicon-chevron-left"></span> Kembali</button> 
+                <button type="button" class="btn btn-danger btn-close" >Tutup</button>
+                <span class="wizard-step"></span>                             
+                <button type="button" name="submit" class="btn btn-primary btn-next" style="float:right;">Lanjut <span class="glyphicon glyphicon-chevron-right"></span></button>
 
-                        <div class="row inline-input">
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>Produk</label>
-                                    <select name="product[]" class="form-control" required>
-                                        <option value=''>PRODUK</option>
-                                        <?php foreach($products as $product): ?>
-                                            <option title="<?= $product->name; ?>" value=<?= $product->id ?>><?= (strlen($product->name)>50)?substr(ucfirst($product->name),0, 50)."...":ucfirst($product->name); ?></option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label>Jumlah</label>
-                                    <input type="number" min=0 name="quantity[]" class="form-control" required>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="form-group">
-                                    <label>Harga satuan</label>
-                                    <input type="number" min=0 name="price_unit[]" class="form-control" required>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="form-group">
-                                    <label>Diskon (%)</label>
-                                    <input type="number" min=0 name="item_discount[]" class="form-control" required>
-                                </div>
-                            </div>
-                        </div>
+            </form>
 
-                        <!--<span><button class="btn btn-danger btn-float"><span class="glyphicon glyphicon-trash"></span></button></span>-->
-                        <button type="button" class="btn btn-default btn-add-input-form">Tambah</button>
-                        
-                        <div class="form-group">
-                            <label>Keterangan tambahan</label>
-                            <textarea name="remark" class="form-control" placeholder="Keterangan tambahan"></textarea>
-                        </div>
-                    </div>
-                    <div class="modal-wizard">
-                        <div class="description">
-                            <p>Form ini digunakan untuk menambahkan data tanda terima. Form ini digunakan untuk menambahkan data tanda terima.</p>
-                            <dl>
-                            <dt>Catatan</dt>
-                                <dd>Pinjam: pihak asal(<em>dari</em>) meminjamkan barang kepada yang sebagai tujuan(<em>untuk</em>)</dd>
-                                <dd>Serah terima: pihak asal(<em>dari</em>) melakukan serah terima barang ke pihak tujuan(<em>untuk</em>) 
-                            </dl>
-                        </div>
-                        <div class="form-group">
-                            <label>PPN</label>
-                            <input type="number" min=0 name="ppn" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Diketahui oleh</label>
-                            <select name="acknowledged_by" class="form-control" required>
-                                <option value=''>-</option>
-                                <?php foreach($approvalPerson as $person): ?>
-                                    <option value=<?= $person->user_id ?>><?= ucfirst($person->name); ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Disetujui oleh</label>
-                            <select name="approved_by" class="form-control" required>
-                                <option value=''>-</option>
-                                <?php foreach($approvalPerson as $person): ?>
-                                    <option value=<?= $person->user_id ?>><?= ucfirst($person->name); ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                    </div>
-
-                    <button type="button" class="btn btn-danger btn-back" style="display:none;"><span class="glyphicon glyphicon-chevron-left"></span> Kembali</button> 
-                    <button type="button" class="btn btn-danger btn-close" >Tutup</button>
-                    <span class="wizard-step"></span>                             
-                    <button type="button" name="submit" class="btn btn-primary btn-next" style="float:right;">Lanjut <span class="glyphicon glyphicon-chevron-right"></span></button>
-
-                </form>
-
-                <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span> </button>
-            
-            </div>
+            <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span> </button>
+        
         </div>
+    </div>
 
 </main>
 

@@ -9,19 +9,19 @@ class StockController{
 
     private $role;
     private $placeholderStockForm = array(
-        "service_point" => "required",
-        "ownership" => "required",
         "product" => "required",
-        "received_at" => "required",
-        "serial_number" => "required",
-        "stock_condition" => "required",
-        "notes" => ""
+        "quantity" => "required",
+        "unit" => "required",
+        "remark" => "",
+        "other_name" => ""
     );
 
     private $placeholderStock = array(
         [
             "product" => "required",
             "quantity" => "required",
+            "unit" => "required",
+            "other_name" => ''
         ],
         [
             "document" => "required",
@@ -152,8 +152,96 @@ class StockController{
         
         $stocksData=array_slice($stocksData,$limitStart,maxDataInAPage());
 
+        setSearchPage();
+
         view('stock/index', compact('stocksData', 'partners', 'approvalPerson', 'products', 'vendors', 'pages', 'servicePoints', 'sumOfAllData', 'category'));
     
+    }
+
+    public function stockIO(){
+        if(!$this->role->can("view-stock")){
+            redirectWithMessage([[ returnMessage()['stock']['accessRight']['view'] , 0]], getLastVisitedPage());
+        }
+
+        $builder = App::get('builder');
+
+        $category = $builder->getAllData('product_categories', 'Product');
+
+        $products=$builder->getAllData('products', 'Product');
+
+        //Searching for specific category
+        
+        $whereClause='';
+        
+        if(isset($_GET['search']) && $_GET['search']==true){
+
+            $search=array();
+
+            $search['c.id']=filterUserInput($_GET['category']);
+            $search['product']=filterUserInput($_GET['product']);
+    
+            $operator='&&';
+
+            foreach($search as $k => $v){
+                if($search[$k]!=""){
+                    $whereClause.=$k."=".$v.$operator;
+                }
+            }
+
+            $whereClause=trim($whereClause, '&&');
+    
+        }
+
+        if($whereClause==''){
+            $whereClause=1;
+        }
+
+        $stockData = $builder->custom("SELECT b.id as pid, b.name as product, c.name as category,
+        IFNULL((select sum(quantity) as quantity from stocks where status=1 and product=a.product), 0) as stock_in,
+        IFNULL((select sum(quantity) as quantity from stocks where status=2 and product=a.product),0) as stock_out
+        FROM `stocks` as a 
+        INNER JOIN products as b on a.product=b.id 
+        INNER JOIN product_categories as c on b.category=c.id
+        GROUP BY b.id
+        ORDER BY b.name ", 'Stock');
+
+        //download all the data
+        if(isset($_GET['download']) && $_GET['download']==true){
+            
+            $dataColumn = ['product', 'category', 'stock_in', 'stock_out'];
+
+            $this->download(toDownload($stockData, $dataColumn));
+
+        }
+
+        //Pagination
+        //only show data for specified page
+        if(isset($_GET['p'])){
+            $p=$_GET['p'];
+
+            if(!is_numeric($p)){
+                redirectWithMessage([["Halaman yang anda tuju tidak diketahui",0]],getLastVisitedPage());
+            }
+            
+        }else{
+            $p=1;
+        }
+        
+        $limitStart=$p*maxDataInAPage()-maxDataInAPage();
+
+        $pages=ceil(count($stockData)/maxDataInAPage());
+    
+        //End of pagination
+
+        //======================//
+
+        $sumOfAllData=count($stockData);
+        
+        $stockData=array_slice($stockData,$limitStart,maxDataInAPage());
+
+        setSearchPage();
+
+        view('stock/io', compact('stockData', 'products', 'pages', 'sumOfAllData', 'category'));
     }
 
     public function stockHistory(){
@@ -238,7 +326,7 @@ class StockController{
         INNER JOIN form_project as e on d.project=e.id
         INNER JOIN product_categories as f on b.category=f.id
         WHERE c.document=10 and $whereClause
-        ORDER BY created_at", "Stock");
+        ORDER BY created_at DESC", "Stock");
 
         //download all the data
         if(isset($_GET['download']) && $_GET['download']==true){
@@ -370,6 +458,10 @@ class StockController{
             redirectWithMessage([[ returnMessage()['stock']['accessRight']['create'] , 0]], getLastVisitedPage());
         }
 
+        $status = filterUserInput($_POST['status']);
+        $idDoc = filterUserInput($_POST['doc_number']);
+        $receiveSendDate = filterUserInput($_POST['receive_send_date']);
+
         //checking form requirement
         $data=[];
         $passingRequirement = true;
@@ -385,38 +477,78 @@ class StockController{
 
         //if not the passing requirements
         if(!$passingRequirement){
-            //array_shift($_SESSION['sim-messages'], [returnMessage()['formNotPassingRequirements'], 0]);
             redirectWithMessage( $_SESSION['sim-messages'] ,getLastVisitedPage());
-            //redirect(getLastVisitedPage());
         }
 
-        $data['created_by'] = substr($_SESSION['sim-id'], 3, -3);
-        $data['updated_by'] = substr($_SESSION['sim-id'], 3, -3);
+        //check whether the value between keys is equal
+        $dataKeys= array_keys($data);
 
-        $serialNumber = $data['serial_number'];
+        $value=0;
+        $isSame=true;
+        for($i=0;$i<count($dataKeys);$i++){
+            $countValue = count($data[$dataKeys[$i]]);
+            if($i==0){
+                $value = $countValue;
+            }
+            if($countValue!=$value){
+                $isSame=false;
+            }
+        }
+
+        if(!$isSame){
+            redirectWithMessage([["Mohon isi data product dengan lengkap", 0]], getLastVisitedPage());
+        }
+
+        //dd($data);
+
+        $newDataRecap=[];
+        for($i=0; $i<$value; $i++){
+            $newData=[];
+            foreach($dataKeys as $key){
+                $newData[$key]=$data[$key][$i];
+            }
+            $newData['updated_by'] = substr($_SESSION['sim-id'], 3, -3);
+            $newData['created_by'] = substr($_SESSION['sim-id'], 3, -3);
+            $newData['status'] = $status;
+
+            if($status==11){
+                $newData['received_at'] = $receiveSendDate;
+            }elseif($status==6){
+                $newData['send_at'] = $receiveSendDate;
+            }
+
+            array_push($newDataRecap, $newData);
+        }
+        
+        
 
         $builder = App::get('builder');
         
         $flag = true;
-        
-        for($i=0; $i<count($serialNumber); $i++){
-            $data['serial_number']=$serialNumber[$i];
-            
-            $insertToStock = $builder->insert("stocks", $data);
-            
-            if(!$insertToStock){
+
+        for($i=0; $i<count($newDataRecap); $i++){
+
+            $insertToStockRelation = $builder->insert("stock_relation", ['document' => 11, 'spec_doc' => $idDoc]);
+
+            $stockRelation = $builder->getPdo()->lastInsertId();
+
+            $newDataRecap[$i]['stock_relation'] = $stockRelation;
+           
+            $insertToStock = $builder->insert("stocks", $newDataRecap[$i]);
+
+            if(!$insertToStock || !$insertToStockRelation){
                 $flag = false;
             }
+
         }
 
         if(!$flag){
-            recordLog('Stock', returnMessage()['stock']['createFail'] );
-            redirectWithMessage([[ returnMessage()['databaseOperationFailed'], 0]],getLastVisitedPage());
-            exit();
-        }else{
-            recordLog('Stock', returnMessage()['stock']['createSuccess'] );
+            recordLog('Stock', 'Maaf, Gagal memperbaharui stock item' );
+            redirectWithMessage([['Maaf, Gagal memperbaharui stock item', 0]],getLastVisitedPage());
         }
 
+        recordLog('Stock', 'Berhasil memperbaharui stock item' );
+        
         $builder->save();
 
         //redirect to form page with message
@@ -470,6 +602,9 @@ class StockController{
         //checking form requirement
         $data=[];
 
+        $receiveSendDate = filterUserInput($_POST['receive_send_date']);
+        $id = filterUserInput($_POST['do-item']);
+
         //check the requirement
         //if passing the requirement, put the data into $data array
         //otherwise redirect back to the page
@@ -477,8 +612,7 @@ class StockController{
         $passingRequirement=true;
         $_SESSION['sim-messages']=[];
 
-        foreach($_POST as $k => $v){
-
+        foreach($this->placeholderStockForm as $k => $v){
             if(checkRequirement($v, $k, $_POST[$k])){
                 $data[$k]=filterUserInput($_POST[$k]);
             }else{
@@ -492,6 +626,59 @@ class StockController{
             //redirect(getLastVisitedPage());
         }
 
+        $data['updated_by'] = substr($_SESSION['sim-id'], 3, -3);
+
+        $builder = App::get('builder');
+
+        $status = $builder->getSpecificData("stocks", ['status'], ['id' => $id], '', 'Stock');
+
+        if($status[0]->status==1){
+            $data['received_at'] = $receiveSendDate;
+        }elseif($status[0]->status==2){
+            $data['send_at'] = $receiveSendDate;
+        }
+
+        $updateStock = $builder->update("stocks", $data, ['id' => $id], '', 'Document');
+
+        if(!$updateStock){
+            recordLog('stock form', "Memperbaharui stock item gagal" );
+            redirectWithMessage([["Memperbaharui stock item gagal", 0]],getLastVisitedPage());
+        }
+
+        recordLog('stock form', "Memperbaharui stock item berhasil" );
+
+        $builder->save();
+
+        //redirect to form page with message
+        redirectWithMessage([[ "Memperbaharui stock item berhasil",1]],getLastVisitedPage());
+        
+    }
+
+    public function stockRemove(){
+        if(!$this->role->can("remove-stock")){
+            redirectWithMessage([[ returnMessage()['stock']['accessRight']['delete'] , 0]], getLastVisitedPage());
+        }
+        
+        //checking form requirement
+        $data=[];
+
+        $id = filterUserInput($_POST['do-item']);
+
+        $builder = App::get('builder');
+
+        $removeStock = $builder->delete("stocks", ['id' => $id], '', 'Stock');
+
+        if(!$removeStock){
+            recordLog('stock form', "Menghapus stock item gagal" );
+            redirectWithMessage([["Menghapus stock item gagal", 0]],getLastVisitedPage());
+        }
+
+        recordLog('stock form', "Menghapus stock item berhasil" );
+
+        $builder->save();
+
+        //redirect to form page with message
+        redirectWithMessage([[ "Menghapus stock item berhasil",1]],getLastVisitedPage());
         
     }
 
@@ -586,6 +773,7 @@ class StockController{
 
     //Tested
     public function stockIn(){
+
         if(!$this->role->can("create-stock")){
             redirectWithMessage([[ returnMessage()['stock']['accessRight']['create'] , 0]], getLastVisitedPage());
         }
@@ -622,8 +810,6 @@ class StockController{
         $data[0]['created_by'] = substr($_SESSION['sim-id'], 3, -3);
         $data[0]['updated_by'] = substr($_SESSION['sim-id'], 3, -3);
         $data[0]['status'] = $doType;
-
-        //$serialNumber = $data[0]['serial_number'];
 
         $builder = App::get('builder');
 

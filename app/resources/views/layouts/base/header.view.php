@@ -31,6 +31,7 @@ require 'only-header.view.php';
                 <li><a href="/product">Product</a></li>
                 <li><a href="#">Stock<span class="caret"></span></a>
                     <ul class="dropdown">
+                        <li><a href='/stock/io'>IO</a></li>
                         <li><a href='/stock'>Recap</a></li>
                         <li><a href='/stock/history'>History</a></li>
                     </ul>
